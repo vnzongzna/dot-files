@@ -1,0 +1,178 @@
+#+TITLE: Emacs Configuration
+#+AUTHOR: Vaibhav Kaushik
+#+EMAIL: vaibhavkaushik@disroot.org
+#+OPTIONS: toc:nil num:nil
+* Personal Information
+** Who am I?
+#+BEGIN_SRC emacs-lisp
+  (setq user-full-name "Vaibhav Kaushik"
+        user-mail-address "vaibhavkaushik@gmail.com")
+#+END_SRC
+* Adding Melpa
+#+BEGIN_SRC emacs-lisp
+(require 'package)
+(add-to-list 'package-archives
+             '("melpa-stable" . "https://stable.melpa.org/packages/") t)
+
+(setq package-enable-at-startup nil) ; To avoid initializing twice
+(package-initialize)
+#+END_SRC
+* Backup
+#+BEGIN_SRC emacs-lisp
+(setq backup-directory-alist '(("." . "~/.emacs.d/backup"))
+    backup-by-copying t    ; Don't delink hardlinks
+    version-control t      ; Use version numbers on backups
+    delete-old-versions t  ; Automatically delete excess backups
+    kept-new-versions 20   ; how many of the newest versions to keep
+    kept-old-versions 5    ; and how many of the old
+    )
+#+END_SRC
+* Custom Defaults
+#+BEGIN_SRC emacs-lisp
+(defalias 'yes-or-no-p 'y-or-n-p)
+(setq inhibit-splash-screen t
+      initial-scratch-message nil
+      initial-major-mode 'org-mode
+      x-select-enable-clipboard t
+      column-number-mode t
+      ring-bell-function 'ignore)
+(tool-bar-mode -1)
+(toggle-scroll-bar -1)
+(global-linum-mode 1)
+(savehist-mode 1)
+;;(org-agenda nil "a")
+(recentf-mode 1)
+(setq recentf-max-menu-items 25)
+#+END_SRC
+* Keybindings
+#+BEGIN_SRC emacs-lisp
+(global-set-key (kbd "C-x C-r") 'recentf-open-files)
+(global-set-key (kbd "C-x g") 'magit-status)
+(global-set-key (kbd "C-c a") 'org-agenda)
+(global-set-key (kbd "C-c j") 'org-journal-new-entry)
+(global-set-key (kbd "C-0") 'delete-window)
+(global-set-key (kbd "C-1") 'delete-other-windows)
+(global-set-key (kbd "C-2") 'split-window-below)
+(global-set-key (kbd "C-3") 'split-window-right)
+(global-set-key (kbd "RET") 'newline-and-indent)
+(global-set-key (kbd "C-+") 'text-scale-increase)
+(global-set-key (kbd "C--") 'text-scale-decrease)
+(global-set-key (kbd "M-o") 'other-window)
+(global-set-key (kbd "C-c s c") 'org-update-actuals)
+#+END_SRC
+* Custom variables set by =custom=
+#+BEGIN_SRC emacs-lisp
+  (custom-set-variables
+   '(org-agenda-files
+     (quote
+      ("~/github/operation-blue-moon/sprints/2018/oct-10-2018-oct-23-2018.org" "~/github/operation-blue-moon/sprints/2018/sep-24-2018-oct-09-2018.org")))
+   '(package-selected-packages
+     (quote
+      (org-pomodoro htmlize py-autopep8 flycheck elpy org-journal
+      org-bullets markdown-mode dracula-theme use-package))))
+#+END_SRC
+* =use-package=
+#+BEGIN_SRC emacs-lisp
+  (unless (package-installed-p 'use-package)
+    (package-install 'use-package))
+
+  (setq use-package-verbose t)
+  (setq use-package-always-ensure t)
+
+  (require 'use-package)
+#+END_SRC
+** Installed Packages
+ #+BEGIN_SRC emacs-lisp
+ (use-package dracula-theme
+     :ensure t
+     :config
+     (load-theme 'dracula t))
+
+ (use-package markdown-mode
+   :ensure t
+   :commands (markdown-mode gfm-mode)
+   :mode (("README\\.md\\'" . gfm-mode)
+          ("\\.md\\'" . markdown-mode)
+          ("\\.markdown\\'" . markdown-mode))
+   :init (setq markdown-command "multimarkdown"))
+ (use-package org-journal
+               :ensure t
+	       :custom
+	       (org-journal-dir "~/github/hacking-for-me/journal/")
+	       (org-journal-file-format "%d.%m.%Y.org"))
+	      
+ #+END_SRC
+
+* Language configurations
+** Python
+ #+BEGIN_SRC emacs-lisp
+ (setq elpy-rpc-python-command "python3")
+ (when (require 'elpy nil t)
+   (elpy-enable))
+ (setq elpy-rpc-backend "jedi")
+ ;; enable autopep8 formatting on save
+ (require 'py-autopep8)
+ (add-hook 'elpy-mode-hook 'py-autopep8-enable-on-save)
+ #+END_SRC
+* Org Mode
+#+BEGIN_SRC emacs-lisp
+ (require 'org-bullets)
+ (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
+
+ (require 'org-journal)
+
+ (setq org-log-done t
+       org-todo-keywords '((sequence "TODO" "IN_PROGRESS" "DONE")))
+
+ (add-hook 'org-mode-hook
+           (lambda ()
+             (flyspell-mode)))
+#+END_SRC
+** Scrum
+ #+BEGIN_SRC emacs-lisp
+ (defun org-update-actuals ()
+   (interactive)
+   (org-entry-put (point) "ACTUAL"
+                  (format "%0.2f" (/ (org-clock-sum-current-item) 60.0))))
+
+
+ (define-skeleton insert-org-entry
+       "Prompt for task, estimate and category"
+       nil
+       '(setq task  (skeleton-read "Task: "))
+       '(setq estimate  (skeleton-read "Estimate: "))
+       '(setq category (skeleton-read "Category: "))
+       '(setq timestamp (format-time-string "%s"))
+	task \n
+       ":PROPERTIES:" \n
+       ":ESTIMATED: " estimate \n
+       ":ACTUAL:" \n
+       ":OWNER: homuncculus" \n
+       ":ID: " category "." timestamp \n
+       ":TASKID: " category "." timestamp \n
+       ":END:")
+ #+END_SRC
+
+** Export Options =ox=
+ #+BEGIN_SRC emacs-lisp
+ (add-to-list 'load-path "~/.emacs.d/elpa/org-reveal")
+ (require 'ox-reveal)
+ #+END_SRC
+** =org-pomodoro=
+#+BEGIN_SRC emacs-lisp
+(defun my/org-pomodoro-text-time ()
+  "Return status info about org-pomodoro and if org-pomodoro is not running, try to print info about org-clock.
+    If either org-pomodoro or org-clock aren't active, print \"No Active Task \" "
+  (interactive)
+  (cond ((equal :none org-pomodoro-state)
+         (if (org-clock-is-active)
+             (format "Task: %d m %s"
+                     (org-clock-get-clocked-time) (substring-no-properties org-clock-heading)
+                     "No Active task")))
+        ((equal :pomodoro org-pomodoro-state)
+         (format "%d - Pomodoro: %d minutes - %s"
+                 org-pomodoro-count (/ (org-pomodoro-remaining-seconds) 60) (substring-no-properties org-clock-heading)))
+        ((equal :short-break org-pomodoro-state) "Short Break")
+        ((equal :long-break org-pomodoro-state)  "Long Break")))
+#+END_SRC
+
