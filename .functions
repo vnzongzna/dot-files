@@ -40,3 +40,8 @@ git-remove-all-commit() {
             ;;
     esac
 }
+
+# Get Cheatsheets
+cheat() {
+    curl cht.sh/"$@"
+}

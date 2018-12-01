@@ -19,7 +19,6 @@ set $ws2    "2:  Code"
 set $ws3    "3:  Firefox"
 set $ws4    "4:  Files"
 set $ws5    "5:  Documents"
-set $ws8    "8:  Feeds" 
 set $ws9    "9:  Chat"
 set $ws10   "10:  Settings"
 
@@ -58,23 +57,11 @@ bindsym $mod+$down  focus down
 bindsym $mod+$up    focus up
 bindsym $mod+$right focus right
 
-# alternatively, you can use the cursor keys:
-bindsym $mod+Left   focus left
-bindsym $mod+Down   focus down
-bindsym $mod+Up     focus up
-bindsym $mod+Right  focus right
-
 # move focused window
 bindsym $mod+Shift+$left    move left
 bindsym $mod+Shift+$down    move down
 bindsym $mod+Shift+$up      move up
 bindsym $mod+Shift+$right   move right
-
-# alternatively, you can use the cursor keys:
-bindsym $mod+Shift+Left     move left
-bindsym $mod+Shift+Down     move down
-bindsym $mod+Shift+Up       move up
-bindsym $mod+Shift+Right    move right
 
 # split in horizontal orientation
 bindsym $mod+h split h
@@ -130,7 +117,7 @@ bindsym $mod+4 workspace $ws4
 bindsym $mod+5 workspace $ws5
 bindsym $mod+6 workspace 6
 bindsym $mod+7 workspace 7
-bindsym $mod+8 workspace $ws8
+bindsym $mod+8 workspace 8
 bindsym $mod+9 workspace $ws9
 bindsym $mod+0 workspace $ws10
 
@@ -142,7 +129,7 @@ bindsym $mod+Shift+4 move container to workspace $ws4
 bindsym $mod+Shift+5 move container to workspace $ws5
 bindsym $mod+Shift+6 move container to workspace 6
 bindsym $mod+Shift+7 move container to workspace 7
-bindsym $mod+Shift+8 move container to workspace $ws8
+bindsym $mod+Shift+8 move container to workspace 8
 bindsym $mod+Shift+9 move container to workspace $ws9
 bindsym $mod+Shift+0 move container to workspace $ws10
 
@@ -155,8 +142,9 @@ for_window [class="Menu"]                           floating enable
 for_window [class="Nm-connection-editor"]           floating enable
 for_window [class="Pavucontrol"]                    floating enable
 for_window [class="GitKraken"]                      floating enable
+#for_window [class="xfce4-terminal"]                 floating enable
 #remove after semester 5
-for_window [class="Toplevel"]                       floating enable
+#for_window [class="Toplevel"]                       floating enable
 
 # assign program to workspace
 assign [class="Emacs"]              → $ws2
@@ -173,7 +161,7 @@ assign [class="GParted"]            → $ws10
 assign [class="Menu"]               → $ws10
 
 #removing titlebar
-for_window [class="^.*"] border pixel 1
+#for_window [class="^.*"] border pixel 1
 # reload the configuration file
 bindsym $mod+Shift+c reload
 # restart i3 inplace (preserves your layout/session, can be used to upgrade i3)
@@ -190,12 +178,6 @@ mode "  " {
     bindsym $down   resize grow height 10 px or 10 ppt
     bindsym $up     resize shrink height 10 px or 10 ppt
     bindsym $right  resize grow width 10 px or 10 ppt
-
-    # same bindings, but for the arrow keys
-    bindsym Left    resize shrink width 10 px or 10 ppt
-    bindsym Down    resize grow height 10 px or 10 ppt
-    bindsym Up      resize shrink height 10 px or 10 ppt
-    bindsym Right   resize grow width 10 px or 10 ppt
 
     # back to normal: Enter or win+r
     bindsym Return mode "default"
@@ -217,7 +199,7 @@ bar {
     bindsym button5         nop
     position                bottom
     tray_output             primary
-    separator_symbol        "·"
+    separator_symbol        "|"
     workspace_buttons       yes
     strip_workspace_numbers yes
 
@@ -234,21 +216,20 @@ bar {
 }
 
 # i3-gaps
-smart_gaps on
-gaps inner 8
-gaps outer 2
+#smart_gaps on
+#gaps inner 8
+#gaps outer 2
 
 # shortcut applications
-bindsym $mod+F2 workspace $ws2; exec emacs
+bindsym $mod+F2 workspace $ws2; exec xfce4-terminal -x nvim
 bindsym $mod+F3 workspace $ws3; exec firefox
 bindsym $mod+F4 workspace $ws4; exec thunar
 bindsym $mod+F5 workspace $ws5; exec evince
-bindsym $mod+F8 workspace $ws8; exec flatpak run org.gnome.FeedReader
 bindsym $mod+F9 workspace $ws9; exec quasselclient
 bindsym Print                   exec --no-startup-id xfce4-screenshooter
-bindsym $mod+z                  exec --no-startup-id i3lock-fancy -f Source-Sans-Pro
-bindsym $mod+p                  exec systemctl poweroff
+bindsym $mod+shift+z            exec --no-startup-id i3lock -i ~/Pictures/lockscreen.png -c '#000000' -o '#191d0f' -w '#572020' -l '#ffffff' -e
 bindsym $mod+shift+p            exec systemctl reboot
+bindsym $mod+p            exec systemctl poweroff
 
 # bindsym --release Caps_Lock exec pkill -SIGRTMIN+11 i3blocks
 # bindsym --release Num_Lock  exec pkill -SIGRTMIN+11 i3blocks
@@ -270,11 +251,10 @@ exec xinput set-prop 13 274 1
 # Auto-starts applications
 exec --no-startup-id xinput set-prop "SynPS/2 Synaptics TouchPad" "libinput Tapping Enabled" 1
 exec --no-startup-id xinput set-prop "SynPS/2 Synaptics TouchPad" "libinput Natural Scrolling Enabled" 1
-exec --no-startup-id xautolock -time 10 -locker "i3lock-fancy -f Source-Sans-Pro"
+exec --no-startup-id xautolock -time 10 -locker "i3lock -i ~/Pictures/lockscreen.png -c '#000000' -o '#191d0f' -w '#572020' -l '#ffffff' -e"
 exec --no-startup-id nm-applet
 exec --no-startup-id redshift
 exec --no-startup-id pulseaudio --start
 exec --no-startup-id feh --bg-scale ~/Pictures/background.png
-exec --no-startup-id compton --config ~/.config/compton/compton.conf
 exec --no-startup-id xset -b 
 exec /usr/bin/numlockx on
